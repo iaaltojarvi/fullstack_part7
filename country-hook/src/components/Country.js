@@ -6,15 +6,16 @@ const Country = ({ country }) => {
         return (
             <>
                 <h3>{country.name} </h3>
-                <div>capital {country.capital} </div>
-                <div>population {country.population}</div>
+                <div>Capital:  {country.capital} </div>
+                <div>Population:  {country.population}</div>
+                <br></br>
                 <img src={country.flag} height='100' alt={`flag of ${country.name}`} />
             </>
         )
     } else if (country === 'Not found') {
         return (
             <div>
-                not found...
+                Not found...
             </div>
         )
     } else {
