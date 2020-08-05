@@ -1,10 +1,9 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import './Notification.css'
 
 const Notification = ({ notification }) => {
-const error = notification && notification.includes('Error')
+  const error = notification && notification.includes('Error')
   if (!notification) {
     return null
   }
