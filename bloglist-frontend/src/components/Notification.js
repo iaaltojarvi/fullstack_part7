@@ -1,30 +1,22 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 import './Notification.css'
 
-const Notification = ({ notification, errorMessage }) => {
-  if (notification === null && errorMessage === null) {
+const Notification = ({ notification }) => {
+const error = notification && notification.includes('Error')
+  if (!notification) {
     return null
   }
-  if (errorMessage !== null) {
-    return (
-      < div className="error">
-        {errorMessage}
-      </div>
-    )
-  }
-  if (notification !== null) {
-    return (
-      <div className="notification">
-        {notification}
-      </div>
-    )
-  }
+  return (
+    <div className={error ? "error" : "notification"}>
+      {notification}
+    </div>
+  )
 }
 
 Notification.propTypes = {
-  notification: PropTypes.string,
-  errorMessage: PropTypes.string
+  notification: PropTypes.string
 }
 
 export default Notification

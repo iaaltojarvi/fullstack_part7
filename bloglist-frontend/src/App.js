@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import BlogEntry from './components/BlogEntry'
 import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { setNotification } from './reducers/notificationReducer'
 
 const App = () => {
+
+  const dispatch = useDispatch()
+  const notifications = useSelector(state => state)
+
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [message, setMessage] = useState(null)
   const [newBlog, setNewBlog] = useState(false)
   const [liked, setLiked] = useState(false)
 
@@ -55,16 +59,16 @@ const App = () => {
     blogService
       .update(blog.id, blog)
       .then(returnedBlog => {
-        setMessage(`You liked '${returnedBlog.title}'`)
+        dispatch(setNotification(`You liked '${returnedBlog.title}'`))
         setTimeout(() => {
-          setMessage(null)
+          dispatch(setNotification(null))
         }, 5000)
       })
       .catch(error => {
         console.log(`Error in updating likes: ${error.message}`)
-        setErrorMessage('Could not like, try again later')
+        dispatch(setNotification('Error: Could not like, try again later'))
         setTimeout(() => {
-          setErrorMessage(null)
+          dispatch(setNotification(null))
         }, 5000)
       })
   }
@@ -74,17 +78,17 @@ const App = () => {
       blogService
         .remove(id)
         .then(returnedBlog => {
-          setMessage('You removed the blog', returnedBlog)
+          dispatch(setNotification('You removed the blog'))
           setBlogs(blogs.filter(blog => blog.id !== id))
           setTimeout(() => {
-            setMessage(null)
+            dispatch(setNotification(null))
           }, 5000)
         })
         .catch(error => {
           console.log(`Error in remove: ${error.message}`)
-          setErrorMessage('Could not remove, try again later')
+          dispatch(setNotification('Error: Could not remove, try again later'))
           setTimeout(() => {
-            setErrorMessage(null)
+              dispatch(setNotification(null))
           }, 5000)
         })
     }
@@ -104,9 +108,9 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (error) {
-      setErrorMessage('Wrong credentials')
+      dispatch(setNotification('Error: Wrong credentials'))
       setTimeout(() => {
-        setErrorMessage(null)
+        dispatch(setNotification(null))
       }, 5000)
     }
   }
@@ -121,17 +125,17 @@ const App = () => {
     blogService.create(newObject)
       .then(returnedBlog => {
         setNewBlog(true)
-        setMessage(`A new blog: '${returnedBlog.title}'  by  '${returnedBlog.author}'  added`)
+        dispatch(setNotification(`A new blog: '${returnedBlog.title}'  by  '${returnedBlog.author}'  added`))
         setTimeout(() => {
-          setMessage(null)
+          dispatch(setNotification(null))
         }, 5000)
         setNewBlog(false)
       })
       .catch(error => {
         console.log(`Error in post: ${error.message}`)
-        setErrorMessage('Please provide all the fields correctly')
+        dispatch(setNotification('Error: Please provide all the fields correctly'))
         setTimeout(() => {
-          setErrorMessage(null)
+          dispatch(setNotification(null))
         }, 5000)
       })
   }
@@ -187,7 +191,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification notification={message} errorMessage={errorMessage} />
+      <Notification notification={notifications}/>
       {user === null ? loginForm() : allBlogs()}
     </div>
   )
