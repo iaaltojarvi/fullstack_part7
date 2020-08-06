@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import blogService from '../services/blogs'
 
 export const addBlog = (blog) => {
@@ -10,44 +11,57 @@ export const addBlog = (blog) => {
   }
 }
 
-// export const voteAction = (id, content, votes) => {
-//   return async dispatch => {
-//     const voted = await anecdoteService.update(id, content, votes)
-//     dispatch({
-//       type: 'VOTE',
-//       data: voted
-//     })
-//   }
-// }
+export const likeAction = (id, blog, likes) => {
+  return async dispatch => {
+    const liked = await blogService.update(id, blog, likes)
+    console.log('liked in action', liked)
+    dispatch({
+      type: 'LIKE',
+      data: liked
+    })
+  }
+}
 
-export const initializeBlogs = () => {
+export const getAllBlogs = () => {
   return async dispatch => {
     const blogs = await blogService.getAll()
     dispatch({
-      type: 'INIT_ANECDOTES',
+      type: 'GET_ALL_BLOGS',
       data: blogs
+    })
+  }
+}
+
+export const removeBlog = (id) => {
+  return async dispatch => {
+    await blogService.remove(id)
+    dispatch({
+      type: 'REMOVE_BLOG',
+      data: id
     })
   }
 }
 
 const blogReducer = (state = [], action) => {
   switch (action.type) {
-    // case 'VOTE':
-    //   const id = action.data.id
-    //   const anecdoteToUpdate = state.find(anecdote => anecdote.id === id)
-    //   const changedAnecdote = { ...anecdoteToUpdate, votes: anecdoteToUpdate.votes + 1 }
-    //   let newArr = [...state]
-    //   if (anecdoteToUpdate) {
-    //     newArr[state.indexOf(anecdoteToUpdate)] = changedAnecdote
-    //   }
-    //   return newArr
-    case 'NEW_BLOG':
-      const newList = [...state, action.data]
-      return newList
-    case 'INIT_ANECDOTES':
-      return action.data
-    default:
-      return state
+  case 'GET_ALL_BLOGS':
+    return [...action.data]
+  case 'REMOVE_BLOG':
+    const id = action.data
+    const deletedBlog = state.find(blog => blog.id === id)
+    const remaining = state.filter(blog => blog.id !== deletedBlog.id)
+    return remaining
+  case 'LIKE':
+    const idInLike = action.data.id
+    const likedBlog = state.find(blog => blog.id === idInLike)
+    let modifiedArr = [...state]
+    const index = modifiedArr.indexOf(likedBlog)
+    modifiedArr[index] = likedBlog
+    return modifiedArr
+  case 'NEW_BLOG':
+    return [...state, action.data]
+  default:
+    return state
   }
 }
 

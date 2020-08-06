@@ -32,7 +32,7 @@ const Blog = ({ blog, remove, user, addOneLike }) => {
           <br></br>
           <button onClick={() => showMore()}>Hide</button>
           <br></br>
-          {blog.user && user && user.username === blog.user.username &&
+          {user && blog.user && user.username === blog.user.username &&
             <button id="remove-button" onClick={(id) => handleRemove(id)}>Remove</button>
           }
         </div>

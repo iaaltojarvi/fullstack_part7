@@ -7,20 +7,16 @@ import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { setNotification } from './reducers/notificationReducer'
-import { initializeBlogs, addBlog } from './reducers/blogReducer';
+import { getAllBlogs, addBlog, likeAction, removeBlog } from './reducers/blogReducer'
 
 const App = () => {
 
   const dispatch = useDispatch()
-  const notifications = useSelector(state => state.notifications)
-  const blogs = useSelector(state => state.blogs)
+  let blogs = useSelector(state => state.blogs)
 
-  // const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [newBlog, setNewBlog] = useState(false)
-  const [liked, setLiked] = useState(false)
 
   const blogEntryRef = useRef()
 
@@ -34,67 +30,30 @@ const App = () => {
   }, [])
 
   useEffect(() => {
-    dispatch(initializeBlogs())
-    // .then(blogs => {
-    //   const sorted = blogs.sort(function (a, b) {
-    //     return b.likes - a.likes
-    //   })
-    //   setBlogs(sorted)
-    // })
+    dispatch(getAllBlogs())
   }, [dispatch])
 
-  // useEffect(() => {
-  //   if (newBlog || liked) {
-  //     blogService.getAll()
-  //       .then(blogs => {
-  //         const sorted = blogs.sort(function (a, b) {
-  //           return b.likes - a.likes
-  //         })
-  //         setBlogs(sorted)
-  //       })
-  //   }
-  //   setLiked(false)
-  // }, [newBlog, liked])
 
   const addOneLike = (blog) => {
-    setLiked(true)
-    blogService
-      .update(blog.id, blog)
-      .then(returnedBlog => {
-        dispatch(setNotification(`You liked '${returnedBlog.title}'`))
-        setTimeout(() => {
-          dispatch(setNotification(null))
-        }, 5000)
-      })
-      .catch(error => {
-        console.log(`Error in updating likes: ${error.message}`)
-        dispatch(setNotification('Error: Could not like, try again later'))
-        setTimeout(() => {
-          dispatch(setNotification(null))
-        }, 5000)
-      })
+    try {
+      dispatch(likeAction(blog.id, blog, blog.likes))
+      dispatch(setNotification(`You liked '${blog.title}'`))
+    } catch (error) {
+      dispatch(setNotification('Error: Could not like, try again later'))
+    }
   }
 
-  // const remove = (id) => {
-  //   if (window.confirm('Do you really want to delete the blog?')) {
-  //     blogService
-  //       .remove(id)
-  //       .then(returnedBlog => {
-  //         dispatch(setNotification('You removed the blog'))
-  //         setBlogs(blogs.filter(blog => blog.id !== id))
-  //         setTimeout(() => {
-  //           dispatch(setNotification(null))
-  //         }, 5000)
-  //       })
-  //       .catch(error => {
-  //         console.log(`Error in remove: ${error.message}`)
-  //         dispatch(setNotification('Error: Could not remove, try again later'))
-  //         setTimeout(() => {
-  //           dispatch(setNotification(null))
-  //         }, 5000)
-  //       })
-  //   }
-  // }
+  const remove = (id) => {
+    if (window.confirm('Do you really want to delete the blog?')) {
+      try {
+        dispatch(removeBlog(id))
+        dispatch(setNotification('You removed the blog'))
+      } catch (error) {
+        console.log(`Error in remove: ${error.message}`)
+        dispatch(setNotification('Error: Could not remove, try again later'))
+      }
+    }
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -111,9 +70,6 @@ const App = () => {
       setPassword('')
     } catch (error) {
       dispatch(setNotification('Error: Wrong credentials'))
-      setTimeout(() => {
-        dispatch(setNotification(null))
-      }, 5000)
     }
   }
 
@@ -124,23 +80,17 @@ const App = () => {
 
   const handlePost = (newObject) => {
     blogEntryRef.current.toggleVisibility()
-    // blogService.create(newObject)
-    //   .then(returnedBlog => {
-    setNewBlog(true)
-    dispatch(addBlog(newObject))
-    // dispatch(setNotification(`A new blog: '${returnedBlog.title}'  by  '${returnedBlog.author}'  added`))
-    // setTimeout(() => {
-    //   dispatch(setNotification(null))
-    // }, 5000)
-    setNewBlog(false)
-    // })
-    // .catch(error => {
-    //   console.log(`Error in post: ${error.message}`)
-    //   dispatch(setNotification('Error: Please provide all the fields correctly'))
-    //   setTimeout(() => {
-    //     dispatch(setNotification(null))
-    //   }, 5000)
-    // })
+    if (!newObject.title || !newObject.author || !newObject.url) {
+      dispatch(setNotification('Error: Please provide all the fields correctly'))
+    } else {
+      try {
+        dispatch(addBlog(newObject))
+        dispatch(setNotification(`A new blog: '${newObject.title}'  by  '${newObject.author}'  added`))
+      } catch (error) {
+        console.log(`Error in post: ${error.message}`)
+        dispatch(setNotification('Error in creating new blog'))
+      }
+    }
   }
 
   const loginForm = () => (
@@ -187,14 +137,14 @@ const App = () => {
       <br></br>
       <h2>Blogs</h2>
       {blogs && blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} user={user} addOneLike={addOneLike} />
+        <Blog key={blog.id} blog={blog} user={user} remove={remove} addOneLike={addOneLike} />
       )}
     </div>
   )
 
   return (
     <div>
-      <Notification notification={notifications} />
+      <Notification />
       {user === null ? loginForm() : allBlogs()}
     </div>
   )
