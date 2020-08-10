@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import BlogEntry from './components/BlogEntry'
 import Togglable from './components/Togglable'
+import UsersView from './components/UsersView'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { setNotification } from './reducers/notificationReducer'
 import { getAllBlogs, addBlog, likeAction, removeBlog } from './reducers/blogReducer'
-import { getUsersData, setUser, logUserOut } from './reducers/userReducer'
+import { setUser, logUserOut } from './reducers/userReducer'
+import { getUsersData } from './reducers/usersReducer'
 
 const App = () => {
 
   const dispatch = useDispatch()
   let blogs = useSelector(state => state.blogs)
   let users = useSelector(state => state.users)
+  let user = useSelector(state => state.user)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -22,13 +26,14 @@ const App = () => {
   const blogEntryRef = useRef()
 
   useEffect(() => {
+    dispatch(getUsersData())
     let loggedUser = window.localStorage.getItem('loggedUser')
     loggedUser = JSON.parse(loggedUser)
     if (loggedUser) {
       dispatch(setUser(loggedUser))
-      blogService.setToken(loggedUser.token)
+      blogService.setToken(user.user.token)
     }
-  }, [dispatch])
+  }, [dispatch, user.user.token])
 
   useEffect(() => {
     dispatch(getAllBlogs())
@@ -59,14 +64,14 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({
+      const userToLogIn = await loginService.login({
         username, password,
       })
       window.localStorage.setItem(
-        'loggedUser', JSON.stringify(user)
+        'loggedUser', JSON.stringify(userToLogIn)
       )
-      dispatch(setUser(user))
-      blogService.setToken(user.token)
+      dispatch(setUser(userToLogIn))
+      blogService.setToken(user.user.token)
       setUsername('')
       setPassword('')
     } catch (error) {
@@ -126,26 +131,44 @@ const App = () => {
 
   const allBlogs = () => (
     <div>
-      {`'${users.user && users.user.name}' logged in`}
-      <br></br>
-      <button onClick={() => logout()}>Logout</button>
-      <br></br>
-      <br></br>
       <Togglable buttonLabel="Add new blog" ref={blogEntryRef}>
         <BlogEntry handlePost={handlePost} />
       </Togglable>
       <br></br>
       <h2>Blogs</h2>
       {blogs && blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} user={users.user} remove={remove} addOneLike={addOneLike} />
+        <Blog key={blog.id} blog={blog} user={user.user} remove={remove} addOneLike={addOneLike} />
       )}
     </div>
   )
 
+  const padding = {
+    paddingRight: 15
+  }
+
   return (
     <div>
-      <Notification />
-      {!users.user.token ? loginForm() : allBlogs()}
+      <Router>
+        <div>
+          <Link style={padding} to='/'>Blogs</Link>
+          <Link style={padding} to='/users'>Users</Link>
+        </div>
+        <br></br>
+        {`'${user.user && user.user.name}' logged in`}
+        <br></br>
+        <button onClick={() => logout()}>Logout</button>
+        <br></br>
+        <br></br>
+        <Switch>
+          <Route path='/users'>
+            <UsersView allUsers={users} />
+          </Route>
+          <Route path='/'>
+            <Notification />
+            {user ? allBlogs() : loginForm()}
+          </Route>
+        </Switch>
+      </Router>
     </div>
   )
 }
