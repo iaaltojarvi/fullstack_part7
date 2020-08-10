@@ -14,7 +14,6 @@ export const addBlog = (blog) => {
 export const likeAction = (id, blog, likes) => {
   return async dispatch => {
     const liked = await blogService.update(id, blog, likes)
-    console.log('liked in action', liked)
     dispatch({
       type: 'LIKE',
       data: liked
