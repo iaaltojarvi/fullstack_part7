@@ -6,11 +6,13 @@ import Notification from './components/Notification'
 import BlogEntry from './components/BlogEntry'
 import Togglable from './components/Togglable'
 import UsersView from './components/UsersView'
+import User from './components/User'
+import BlogView from './components/BlogView'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { setNotification } from './reducers/notificationReducer'
 import { getAllBlogs, addBlog, likeAction, removeBlog } from './reducers/blogReducer'
-import { setUser, logUserOut } from './reducers/userReducer'
+import { setCurrentUser, logUserOut } from './reducers/userReducer'
 import { getUsersData } from './reducers/usersReducer'
 
 const App = () => {
@@ -18,7 +20,7 @@ const App = () => {
   const dispatch = useDispatch()
   let blogs = useSelector(state => state.blogs)
   let users = useSelector(state => state.users)
-  let user = useSelector(state => state.user)
+  let user = useSelector(state => state.currentUser)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -30,7 +32,7 @@ const App = () => {
     let loggedUser = window.localStorage.getItem('loggedUser')
     loggedUser = JSON.parse(loggedUser)
     if (loggedUser) {
-      dispatch(setUser(loggedUser))
+      dispatch(setCurrentUser(loggedUser))
       blogService.setToken(user.user.token)
     }
   }, [dispatch, user.user.token])
@@ -70,7 +72,7 @@ const App = () => {
       window.localStorage.setItem(
         'loggedUser', JSON.stringify(userToLogIn)
       )
-      dispatch(setUser(userToLogIn))
+      dispatch(setCurrentUser(userToLogIn))
       blogService.setToken(user.user.token)
       setUsername('')
       setPassword('')
@@ -137,39 +139,51 @@ const App = () => {
       <br></br>
       <h2>Blogs</h2>
       {blogs && blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} user={user.user} remove={remove} addOneLike={addOneLike} />
+        <Link key={blog.id} to={`/${blog.id}`}><Blog blog={blog} user={user.user} remove={remove} addOneLike={addOneLike} /></Link>
       )}
     </div>
   )
 
   const padding = {
-    paddingRight: 15
+    paddingRight: 15,
+    color: 'black'
+  }
+
+  const nav = {
+    backgroundColor: 'grey',
+    color: 'black',
+    height: 25,
+    padding: 10,
   }
 
   return (
     <div>
       <Router>
-        <div>
+        <div style={nav}>
           <Link style={padding} to='/'>Blogs</Link>
           <Link style={padding} to='/users'>Users</Link>
+          <span style={padding}>{`'${user.user && user.user.name}' logged in`}</span>
+          <button style={padding} onClick={() => logout()}>Logout</button>
         </div>
         <br></br>
-        {`'${user.user && user.user.name}' logged in`}
         <br></br>
-        <button onClick={() => logout()}>Logout</button>
-        <br></br>
-        <br></br>
+        <Notification />
         <Switch>
+          <Route path='/users/:id'>
+            <User allUsers={users} />
+          </Route>
           <Route path='/users'>
             <UsersView allUsers={users} />
           </Route>
+          <Route path='/:id'>
+            <BlogView blogs={blogs} addOneLike={addOneLike} />
+          </Route>
           <Route path='/'>
-            <Notification />
-            {user ? allBlogs() : loginForm()}
+            {user.user ? allBlogs() : loginForm()}
           </Route>
         </Switch>
-      </Router>
-    </div>
+      </Router >
+    </div >
   )
 }
 

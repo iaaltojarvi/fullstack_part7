@@ -9,7 +9,7 @@ import usersReducer from './reducers/usersReducer'
 const reducer = combineReducers({
   blogs: blogReducer,
   notifications: notificationReducer,
-  user: userReducer,
+  currentUser: userReducer,
   users: usersReducer
 })
 

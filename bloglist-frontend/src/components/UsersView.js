@@ -1,11 +1,11 @@
 import React from 'react'
-
+import { Link } from 'react-router-dom'
 
 const UsersView = ({ allUsers }) => {
   allUsers = allUsers.flat()
 
   const padding = {
-    paddingRight: 20
+    paddingRight: 30
   }
   const align = {
     textAlign: 'left'
@@ -17,13 +17,13 @@ const UsersView = ({ allUsers }) => {
         <thead style={align}>
           <tr>
             <th></th>
-            <th>Blogs</th>
+            <th>Blogs created</th>
           </tr>
         </thead>
         <tbody>
           {allUsers && allUsers.map(u =>
             <tr key={u.id}>
-              <td style={padding}>{u.name} </td>
+              <td style={padding}><Link to={`/users/${u.id}`}>{u.name}</Link></td>
               <td>{u.blogs.length}</td>
             </tr>
 
