@@ -100,6 +100,10 @@ const App = () => {
     }
   }
 
+  // const handleComment = (newObject, id) => {
+  //   blogService.createComment(newObject, id)
+  // }
+
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       Please login
