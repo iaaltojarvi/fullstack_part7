@@ -1,4 +1,7 @@
 import React, { useState } from 'react'
+import TextField from '@material-ui/core/TextField'
+import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
 
 const BlogEntry = ({ handlePost }) => {
   const [title, setTitle] = useState('')
@@ -32,19 +35,16 @@ const BlogEntry = ({ handlePost }) => {
 
   return (
     <form onSubmit={(event) => addBlog(event)}>
-      Create new blog entry
+      <Typography variant="h6">Create new blog entry</Typography>
       <br></br>
-      Title
-      <input id="title" value={title} type="text" onChange={handleTitleChange} />
+      <TextField id="title" value={title} type="text" onChange={handleTitleChange} label="title" />
       <br></br>
-      Author
-      <input id="author" value={author} name="author" type="text" onChange={handleAuthorChange} />
+      <TextField id="author" value={author} name="author" type="text" label="author" onChange={handleAuthorChange} />
       <br></br>
-      Url
-      <input id="url" value={url} name="url" type="text" onChange={handleUrlChange} />
+      <TextField id="url" value={url} name="url" type="text" label="url" onChange={handleUrlChange} />
       <br></br>
       <br></br>
-      <button id="blog-button" type="submit">Create</button>
+      <Button id="blog-button" type="submit">Create</Button>
     </form>
   )
 }

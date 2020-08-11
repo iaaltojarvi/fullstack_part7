@@ -14,6 +14,16 @@ import { setNotification } from './reducers/notificationReducer'
 import { getAllBlogs, addBlog, likeAction, removeBlog } from './reducers/blogReducer'
 import { setCurrentUser, logUserOut } from './reducers/userReducer'
 import { getUsersData } from './reducers/usersReducer'
+import Button from '@material-ui/core/Button'
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItemIcon from '@material-ui/core/ListItemIcon'
+import FolderOpenIcon from '@material-ui/icons/FolderOpen'
+import Divider from '@material-ui/core/Divider'
 
 const App = () => {
 
@@ -21,6 +31,7 @@ const App = () => {
   let blogs = useSelector(state => state.blogs)
   let users = useSelector(state => state.users)
   let user = useSelector(state => state.currentUser)
+  console.log('user state', user)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -100,10 +111,6 @@ const App = () => {
     }
   }
 
-  // const handleComment = (newObject, id) => {
-  //   blogService.createComment(newObject, id)
-  // }
-
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       Please login
@@ -141,36 +148,41 @@ const App = () => {
         <BlogEntry handlePost={handlePost} />
       </Togglable>
       <br></br>
-      <h2>Blogs</h2>
-      {blogs && blogs.map(blog =>
-        <Link key={blog.id} to={`/${blog.id}`}><Blog blog={blog} user={user.user} remove={remove} addOneLike={addOneLike} /></Link>
-      )}
+      <Typography variant="h4">Blogs</Typography>
+      <List>
+        {blogs && blogs.map(blog =>
+          <>
+            <ListItem key={blog.id}>
+              <ListItemIcon>
+                <FolderOpenIcon></FolderOpenIcon>
+              </ListItemIcon>
+              <ListItemText>
+                <Link style={{ textDecoration: 'none', color: 'black' }} to={`/${blog.id}`}><Blog blog={blog} user={user.user} remove={remove} addOneLike={addOneLike} /></Link>
+              </ListItemText>
+            </ListItem>
+            <Divider />
+          </>
+        )}
+      </List>
     </div>
   )
 
-  const padding = {
-    paddingRight: 15,
+  const nav = {
+    marginRight: 20,
     color: 'black'
   }
 
-  const nav = {
-    backgroundColor: 'grey',
-    color: 'black',
-    height: 25,
-    padding: 10,
-  }
-
   return (
-    <div>
-      <Router>
-        <div style={nav}>
-          <Link style={padding} to='/'>Blogs</Link>
-          <Link style={padding} to='/users'>Users</Link>
-          <span style={padding}>{`'${user.user && user.user.name}' logged in`}</span>
-          <button style={padding} onClick={() => logout()}>Logout</button>
-        </div>
-        <br></br>
-        <br></br>
+    <Router>
+      <AppBar position="absolute" style={{ width: '100%', backgroundColor: 'lightgrey' }}>
+        <Toolbar>
+          <Typography style={nav} variant="h5"><Link style={{ textDecoration: 'none', color: 'black' }} to='/'>Blogs</Link></Typography>
+          <Typography style={nav} variant="h5"><Link style={{ textDecoration: 'none', color: 'black' }} to='/users'>Users</Link></Typography>
+          <Typography style={nav} variant="subtitle1">{`'${user.user && user.user.name}' logged in`}</Typography>
+          <Button style={nav} variant="contained" size="small" onClick={() => logout()}>Logout</Button>
+        </Toolbar>
+      </AppBar>
+      <div style={{ marginTop: 100 }}>
         <Notification />
         <Switch>
           <Route path='/users/:id'>
@@ -183,11 +195,11 @@ const App = () => {
             <BlogView blogs={blogs} addOneLike={addOneLike} />
           </Route>
           <Route path='/'>
-            {user.user ? allBlogs() : loginForm()}
+            {!user.user ? loginForm() : allBlogs()}
           </Route>
         </Switch>
-      </Router >
-    </div >
+      </div>
+    </Router>
   )
 }
 

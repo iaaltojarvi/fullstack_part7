@@ -10,8 +10,9 @@ export const setCurrentUser = (user) => {
 }
 
 export const logUserOut = () => {
+  console.log('in action')
   return {
-    type: 'LOG_OUT'
+    type: 'LOG_OUT',
   }
 }
 
@@ -20,16 +21,15 @@ const defaultState = {
 }
 
 const userReducer = (state = defaultState, action) => {
+  console.log('in reducer', state, action)
   switch (action.type) {
   case 'SET_USER':
     return {
       user: { ...action.user }
     }
   case 'LOG_OUT':
-    localStorage.clear()
-    return {
-      user: {}
-    }
+    window.localStorage.clear()
+    return { ...state }
   default:
     return state
   }
