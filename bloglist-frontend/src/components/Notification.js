@@ -1,5 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
 import './Notification.css'
 
@@ -10,9 +11,9 @@ const Notification = () => {
 
   if (notifications.length) {
     return (
-      <div className={error ? 'error' : 'notification'}>
+      <Typography variant="body1" className={error ? 'error' : 'notification'}>
         {notifications[notifications.length - 1].notification}
-      </div>
+      </Typography>
     )
   } else {
     return null

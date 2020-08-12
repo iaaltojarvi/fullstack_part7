@@ -1,14 +1,14 @@
 .error {
-    color: white;
-    background: red;
+    color: black;
+    background: palevioletred;
     font-size: 20px;
     padding: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
 .notification {
-    color: white;
-    background: green;
+    color: black;
+    background: paleturquoise;
     font-size: 20px;
     padding: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
